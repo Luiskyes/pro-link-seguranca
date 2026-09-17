@@ -73,10 +73,8 @@ Nunca versionar `.env` real. O repositório deve conter somente `.env.example` s
 ## Pontos identificados para revisão adicional
 
 1. **Autorização por propriedade (IDOR):** alguns controllers autenticados consultam/alteram registros somente pelo ID. Antes de produção, toda atualização/exclusão deve verificar se o registro pertence ao usuário ou se ele possui papel administrativo apropriado.
-2. **Rotas parametrizadas:** o `Router` atual registra caminhos como `/demandas/{id}`, mas o `dispatch()` faz correspondência exata. Isso deve ser corrigido para que os parâmetros de rota sejam realmente resolvidos e validados.
-3. **Divergência entre schema e Repository de demandas:** `DemandaRepository` referencia colunas (`area`, `tipo`, `cidade`, `uf`, `modalidade` e, na hidratação, nomes ainda diferentes) que não existem na tabela `demandas` do `estrutura.sql` atual. Deve ser reconciliado antes da demonstração.
-4. **Sanitização:** `SanitizeInputMiddleware` altera `$_POST/$_GET` depois de `Request` já ter capturado os dados. Além disso, escape HTML deve ocorrer preferencialmente na saída, não sobre senhas ou valores de domínio. A CSP e o escape contextual devem ser a defesa principal contra XSS.
-5. **Auditoria completa:** a infraestrutura existe, mas deve-se confirmar que todas as ações sensíveis chamam efetivamente o serviço de auditoria.
+2. **Sanitização:** `SanitizeInputMiddleware` altera `$_POST/$_GET` depois de `Request` já ter capturado os dados. Além disso, escape HTML deve ocorrer preferencialmente na saída, não sobre senhas ou valores de domínio. A CSP e o escape contextual devem ser a defesa principal contra XSS.
+3. **Auditoria completa:** a infraestrutura existe, mas deve-se confirmar que todas as ações sensíveis chamam efetivamente o serviço de auditoria.
 
 ## Checklist do Edital — item 8.5
 

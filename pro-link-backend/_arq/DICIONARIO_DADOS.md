@@ -284,6 +284,11 @@ Demandas de serviços técnicos publicadas.
 | `id_empresa` | `INT UNSIGNED` | Não | FK → pessoa_juridica(id_usuario) | `—` |
 | `titulo` | `VARCHAR(150)` | Não | — | `—` |
 | `descricao` | `TEXT` | Não | — | `—` |
+| `area_demanda` | `VARCHAR(120)` | Não | — | `—` |
+| `tipo_demanda` | `ENUM( 'ESTAGIO', 'PROJETO', 'MENTORIA', 'PESQUISA', 'VOLUNTARIADO' )` | Não | — | `'ESTAGIO'` |
+| `cidade_demanda` | `VARCHAR(120)` | Não | — | `—` |
+| `uf_demanda` | `CHAR(2)` | Não | — | `—` |
+| `modalidade` | `ENUM( 'HIBRIDO', 'PRESENCIAL', 'REMOTO' )` | Não | — | `'PRESENCIAL'` |
 | `status` | `ENUM( 'ABERTA', 'FECHADA', 'CANCELADA', 'SUSPENSA_PELO_CREA' )` | Não | — | `'ABERTA'` |
 | `data_publicacao` | `DATETIME` | Não | — | `CURRENT_TIMESTAMP` |
 | `data_fechamento` | `DATETIME` | Sim | — | `—` |

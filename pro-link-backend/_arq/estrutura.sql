@@ -762,6 +762,16 @@ CREATE TABLE demandas (
 
     descricao TEXT NOT NULL,
 
+    area_demanda VARCHAR(120) NOT NULL,
+
+    tipo_demanda ENUM('ESTAGIO','PROJETO','MENTORIA','PESQUISA','VOLUNTARIADO') NOT NULL DEFAULT 'ESTAGIO',
+
+    cidade_demanda VARCHAR(120) NOT NULL,
+
+    uf_demanda CHAR(2) NOT NULL,
+
+    modalidade ENUM('HIBRIDO','PRESENCIAL','REMOTO') NOT NULL DEFAULT 'PRESENCIAL',
+
     status ENUM(
         'ABERTA',
         'FECHADA',
