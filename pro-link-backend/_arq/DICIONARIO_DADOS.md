@@ -361,7 +361,6 @@ Comentários feitos em publicações.
 | `status_comentario` | `ENUM( 'PUBLICO', 'PRIVADO', 'ARQUIVADO', 'SUSPENSO_PELO_CREA' )` | Não | — | `'PUBLICO'` |
 | `data_comentario` | `DATETIME` | Não | — | `CURRENT_TIMESTAMP` |
 | `atualizado_em` | `DATETIME` | Não | — | `CURRENT_TIMESTAMP` |
-| `a` | `resposta` | Sim | — | `—` |
 
 ## `likes_posts`
 
@@ -454,6 +453,7 @@ Cartas virtuais privadas criadas por usuários.
 | `legenda` | `TEXT` | Sim | — | `—` |
 | `remetente_email` | `VARCHAR(254)` | Não | — | `—` |
 | `destinatario_email` | `VARCHAR(254)` | Não | — | `—` |
+| `nome_arquivo` | `VARCHAR(255)` | Sim | — | `—` |
 | `nome_armazenado` | `VARCHAR(255)` | Sim | — | `—` |
 | `tipo_mime` | `VARCHAR(100)` | Sim | — | `—` |
 | `tamanho_arquivo` | `BIGINT UNSIGNED` | Sim | — | `—` |
