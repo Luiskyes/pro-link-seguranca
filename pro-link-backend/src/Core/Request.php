@@ -23,7 +23,7 @@ class Request
 
         $contentType = $_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
 
-        if (str_contains($contentType, 'application/json')) { 
+        if (str_contains($contentType, 'application/json')) {
             $rawInput = file_get_contents('php://input');
             $this->body = json_decode($rawInput, true) ?? [];
         } else {
@@ -55,5 +55,35 @@ class Request
         }
 
         return $file;
+    }
+
+    public function files(string $key): array
+    {
+        $bucket = $this->files[$key] ?? null;
+
+        if (!is_array($bucket) || !isset($bucket['name'])) {
+            return [];
+        }
+
+        if (!is_array($bucket['name'])) {
+            return ($bucket['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE ? [] : [$bucket];
+        }
+
+        $arquivos = [];
+        foreach ($bucket['name'] as $indice => $nome) {
+            if (($bucket['error'][$indice] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+
+            $arquivos[] = [
+                'name' => $bucket['name'][$indice],
+                'type' => $bucket['type'][$indice],
+                'tmp_name' => $bucket['tmp_name'][$indice],
+                'error' => $bucket['error'][$indice],
+                'size' => $bucket['size'][$indice],
+            ];
+        }
+
+        return $arquivos;
     }
 }

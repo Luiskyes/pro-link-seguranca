@@ -27,7 +27,7 @@ class Auth
     // Gera o hash seguro de uma senha em texto plano.
     public static function hashPassword(string $plainPassword): string
     {
-        return password_hash($plainPassword, (int) config('security.password_algo'));
+        return password_hash($plainPassword, config('security.password_algo'));
     }
 
     // Verifica a senha em texto plano contra o hash armazenado no banco.

@@ -115,6 +115,34 @@ async function recoverPassword(email) {
     }
 }
 
+
+// Redefinir senha usando o token recebido por e-mail.
+async function resetPassword(token, password) {
+    try {
+        const csrfToken = await getCsrfToken();
+
+        const response = await fetch(`${AUTH_API_BASE_URL}/reset-password`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
+            },
+            credentials: 'include',
+            body: JSON.stringify({ token, password })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(data.message || 'Erro ao redefinir a senha.');
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('[Auth] Erro ao redefinir senha:', error.message);
+        return { success: false, message: error.message };
+    }
+}
 // Login via Google
 // OAuth 2.0
 function loginWithGoogle() {

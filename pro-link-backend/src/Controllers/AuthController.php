@@ -120,6 +120,13 @@ class AuthController
         // No banco de dados, o campo é ENUM('USUARIO', 'ADMIN_CREA')
         $perfilAcesso = 'USUARIO';
 
+        // Tipo da conta utilizado pelo feed e pelas regras de acesso.
+        $tipoConta = match ($profileTypeHtml) {
+            'profissional' => \App\Models\User::TIPO_CONTA_PROFISSIONAL,
+            'universitario' => \App\Models\User::TIPO_CONTA_ESTUDANTE,
+            'empresa' => \App\Models\User::TIPO_CONTA_EMPRESA,
+            default => \App\Models\User::TIPO_CONTA_COMUM,
+        };
         if (empty($nome) || empty($email) || empty($senha)) {
             Response::json(['message' => 'Nome, e-mail e senha são obrigatórios.'], 400);
             return;
@@ -160,6 +167,7 @@ class AuthController
             telefone: $telefone,
             tipoPessoa: $tipoPessoa,
             perfilAcesso: $perfilAcesso,
+            tipoConta: $tipoConta,
             contaAtiva: true,
             ultimoLoginEm: null,
             tentativasLogin: 0,
@@ -227,7 +235,7 @@ class AuthController
     {
         $userProfissional = new \App\Models\Profissional(
             idUsuario: $userId,
-            numeroRegistroConfeaCrea: (string) $request->input('crea-record', ''),
+            numeroRegistroConfeaCrea: (string) $request->input('numero_registro_confea_crea', ''),
             categoriaProfissional: (string) $request->input('categoria_profissional', ''),
             anosExperiencia: (int) $request->input('anos_experiencia') ?: null,
             grauAcademico: (string) $request->input('grau_academico'),
@@ -237,8 +245,6 @@ class AuthController
 
     private function createUniversitarioPerfil(int $userId, Request $request): void
     {
-        $universidade = (string) $request->input('institution_ensino');
-
         //valida o formato da data recebida
         $dataRecebida = (string) $request->input('previsao_formatura');
         $data = DateTime::createFromFormat('Y-m-d', $dataRecebida);
@@ -248,12 +254,13 @@ class AuthController
 
         $userUniversitario = new \App\Models\Universitario(
             idUsuario: $userId,
-            universidadeId: $this->universidadeRepository->findByNome($universidade)?->id ?? $this->universidadeRepository->findBySigla($universidade)?->id ?? 0,
-            curso: (string) $request->input('student_modality', ''),
-            matricula: (string) $request->input('student_ra') ?: null,
+            universidadeId: (int) $request->input('universidade_id', 0),
+            curso: (string) $request->input('curso', ''),
+            grau_academico: (string) $request->input('student_level', 'GRADUACAO'),
+            matricula: (string) $request->input('matricula') ?: null,
             semestreAtual: (int) $request->input('semestre_atual') ?: null,
             previsaoFormatura: $valida ? $dataRecebida : null,
-            comprovanteMatricula: $this->storeComprovanteMatricula($request->file('file_comprovante')),
+            comprovanteMatricula: $this->storeComprovanteMatricula($request->file('comprovante_matricula')),
         );
         $this->universitarioRepository->save($userUniversitario);
     }
@@ -274,8 +281,8 @@ class AuthController
     {
         $userEmpresa = new \App\Models\PessoaJuridica(
             idUsuario: $userId,
-            cnpj: (string) $request->input('cnpj', ''),
-            razaoSocial: (string) $request->input('razao_social', ''),
+            cnpj: preg_replace('/\D+/', '', (string) $request->input('document_number', '')) ?? '',
+            razaoSocial: (string) $request->input('name', ''),
             nomeFantasia: (string) $request->input('nome_fantasia') ?: null,
         );
         $this->pessoaJuridicaRepository->save($userEmpresa);
@@ -311,7 +318,7 @@ class AuthController
                 expiraEm: date('Y-m-d H:i:s', time() + 1800),
             ));
 
-            $link = rtrim((string) config('app.url'), '/') . '/reset-password?token=' . $tokenPlano;
+            $link = rtrim((string) config('app.frontend_url'), '/') . '/#redefinir-senha?token=' . $tokenPlano;
 
             $this->notificacaoService->enviarEmail(
                 $user->email,
@@ -361,5 +368,64 @@ class AuthController
         $this->passwordResetTokenRepository->marcarUsado((int) $resetToken->id);
 
         Response::json(['message' => 'Senha redefinida com sucesso.']);
+    }
+
+    // Altera a senha do usuario autenticado mediante confirmacao da senha atual.
+    public function changePassword(Request $request): void
+    {
+        $userId = auth_id();
+
+        if ($userId === 0) {
+            Response::json(['message' => 'Não autorizado.'], 401);
+            return;
+        }
+
+        $user = $this->userRepository->findById($userId);
+
+        if ($user === null) {
+            Response::json(['message' => 'Não autorizado.'], 401);
+            return;
+        }
+
+        $novaSenha = (string) ($request->input('new_password') ?? $request->input('nova_senha'));
+        $senhaAtual = (string) ($request->input('current_password') ?? $request->input('senha_atual'));
+
+        if ($novaSenha === '' || $senhaAtual === '') {
+            Response::json(['message' => 'As senhas são obrigatórias.'], 400);
+            return;
+        }
+
+        if (!Auth::verifyPassword($senhaAtual, $user->senhaHash)) {
+            Response::json(['message' => 'Credenciais invalidas.'], 422);
+            return;
+        }
+
+        if (mb_strlen($novaSenha) < 8) {
+            Response::json(['message' => 'A nova senha deve possuir pelo menos 8 caracteres.'], 422);
+            return;
+        }
+
+        $user->senhaHash = Auth::hashPassword($novaSenha);
+        $this->userRepository->save($user);
+
+        session_regenerate_id(true);
+        $this->passwordResetTokenRepository->marcarTodos($userId);
+
+        Response::json(['message' => 'Senha alterada com sucesso.']);
+    }
+
+    public function csrfToken(Request $request): void
+    {
+        if (
+            !isset($_SESSION['_csrf_token']) ||
+            !is_string($_SESSION['_csrf_token']) ||
+            $_SESSION['_csrf_token'] === ''
+        ) {
+            $_SESSION['_csrf_token'] = bin2hex(random_bytes(32));
+        }
+
+        Response::json([
+            'csrf_token' => $_SESSION['_csrf_token'],
+        ]);
     }
 }

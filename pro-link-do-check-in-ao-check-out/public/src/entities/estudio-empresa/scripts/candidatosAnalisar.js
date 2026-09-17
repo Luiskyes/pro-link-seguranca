@@ -25,7 +25,7 @@
       card.setAttribute('data-interesse-id', c.id);
       card.setAttribute('data-usuario-id', c.id_usuario);
       card.setAttribute('data-demanda-id', c.id_demanda);
-      
+
       let statusHtml = '';
       if (c.status === 'ACEITA') {
           statusHtml = '<span style="color: #00d278;"><i class="bi bi-check-circle-fill"></i> Aceito</span>';
@@ -86,7 +86,7 @@
 
   async function updateInteresseStatus(interesseId, novoStatus, btnElement) {
     const card = document.getElementById('candidato-' + interesseId);
-    
+
     const originalHtml = btnElement.innerHTML;
     btnElement.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
     const allBtns = card.querySelectorAll('.pl-estudio-item-btn');
@@ -101,7 +101,7 @@
         // Sucesso visual
         card.querySelector('.pl-estudio-item-actions').style.opacity = '0.4';
         card.querySelector('.pl-estudio-item-actions').style.pointerEvents = 'none';
-        
+
         let infoContainer = card.querySelector('.pl-estudio-item-info');
         let statusP = document.createElement('p');
         if (novoStatus === 'ACEITA') {
@@ -129,9 +129,13 @@
       listEl.classList.add('d-none');
       emptyEl.classList.add('d-none');
 
-      // Obs: a rota do backend exige o ID da demanda na URL: /demandas/{id}/interesses
-      // Se não houver filtro, passamos 'todas' ou deixamos a responsabilidade para o backend
-      let url = demandaIdFilter ? `/demandas/${demandaIdFilter}/interesses` : `/meus-interesses`;
+      // Se não houver filtro e for empresa, não deve chamar /meus-interesses (que é rota de estudante)
+      if (!demandaIdFilter) {
+          loadingEl.classList.add('d-none');
+          emptyEl.classList.remove('d-none');
+          return;
+      }
+      let url = `/demandas/${demandaIdFilter}/interesses`;
 
       try {
           const data = await apiRequest(url, {
@@ -153,7 +157,7 @@
 
   const hashObj = new URLSearchParams(window.location.hash.split('?')[1]);
   const demandaParam = hashObj.get('demanda');
-  
+
   if (demandaParam && filtroEl) {
       filtroEl.value = demandaParam;
   }

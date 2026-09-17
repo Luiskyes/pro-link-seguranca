@@ -15,6 +15,8 @@ Contas de acesso e dados básicos dos usuários da plataforma.
 | `nome` | `VARCHAR(150)` | Não | — | `—` |
 | `senha_hash` | `VARCHAR(255)` | Não | — | `—` |
 | `telefone` | `VARCHAR(25)` | Não | — | `—` |
+| `estado` | `VARCHAR(25)` | Não | — | `—` |
+| `cidade` | `VARCHAR(25)` | Não | — | `—` |
 | `email` | `VARCHAR(254)` | Não | UNIQUE | `—` |
 | `conta_ativa` | `BOOLEAN` | Não | — | `TRUE` |
 | `criado_em` | `DATETIME` | Não | — | `CURRENT_TIMESTAMP` |
@@ -58,6 +60,10 @@ Dados específicos de usuários pessoa jurídica/empresa.
 | `cnpj` | `VARCHAR(18)` | Não | UNIQUE | `—` |
 | `nome_fantasia` | `VARCHAR(150)` | Sim | — | `—` |
 | `razao_social` | `VARCHAR(150)` | Não | — | `—` |
+| `status_verificacao` | `ENUM( 'NAO_SOLICITADA', 'PENDENTE', 'APROVADA', 'REJEITADA' )` | Não | — | `'NAO_SOLICITADA'` |
+| `data_solicitacao_verificacao` | `DATETIME` | Sim | — | `—` |
+| `doc_contrato_social` | `VARCHAR(255)` | Sim | — | `—` |
+| `doc_comprovante_cadastral` | `VARCHAR(255)` | Sim | — | `—` |
 | `criado_em` | `DATETIME` | Não | — | `CURRENT_TIMESTAMP` |
 | `atualizado_em` | `DATETIME` | Não | — | `CURRENT_TIMESTAMP` |
 
@@ -207,6 +213,21 @@ Competências relacionadas a projetos.
 | `id_projeto` | `INT UNSIGNED` | Não | PK; FK → projetos(id) | `—` |
 | `id_competencia` | `INT UNSIGNED` | Não | PK; FK → competencias(id) | `—` |
 
+## `projeto_imagens`
+
+Galeria de imagens vinculadas aos projetos.
+
+| Campo | Tipo | Nulo? | Chave/Restrição | Padrão |
+|---|---|---|---|---|
+| `id` | `INT UNSIGNED` | Não | PK | `—` |
+| `id_projeto` | `INT UNSIGNED` | Não | FK → projetos(id); INDEX | `—` |
+| `nome_arquivo` | `VARCHAR(255)` | Não | — | `—` |
+| `nome_armazenado` | `VARCHAR(255)` | Sim | — | `—` |
+| `tipo_mime` | `VARCHAR(100)` | Sim | — | `—` |
+| `tamanho` | `BIGINT UNSIGNED` | Sim | — | `—` |
+| `caminho_armazenamento` | `VARCHAR(500)` | Não | — | `—` |
+| `ordem` | `SMALLINT UNSIGNED` | Não | — | `0` |
+| `criado_em` | `DATETIME` | Não | — | `CURRENT_TIMESTAMP` |
 ## `experiencias`
 
 Experiências profissionais do portfólio.
@@ -284,11 +305,11 @@ Demandas de serviços técnicos publicadas.
 | `id_empresa` | `INT UNSIGNED` | Não | FK → pessoa_juridica(id_usuario) | `—` |
 | `titulo` | `VARCHAR(150)` | Não | — | `—` |
 | `descricao` | `TEXT` | Não | — | `—` |
-| `area_demanda` | `VARCHAR(120)` | Não | — | `—` |
-| `tipo_demanda` | `ENUM( 'ESTAGIO', 'PROJETO', 'MENTORIA', 'PESQUISA', 'VOLUNTARIADO' )` | Não | — | `'ESTAGIO'` |
-| `cidade_demanda` | `VARCHAR(120)` | Não | — | `—` |
-| `uf_demanda` | `CHAR(2)` | Não | — | `—` |
-| `modalidade` | `ENUM( 'HIBRIDO', 'PRESENCIAL', 'REMOTO' )` | Não | — | `'PRESENCIAL'` |
+| `area` | `VARCHAR(100)` | Não | — | `''` |
+| `tipo` | `ENUM( 'ESTAGIO', 'PROJETO', 'CONSULTORIA', 'ART', 'PERICIA', 'MENTORIA', 'PESQUISA', 'VOLUNTARIADO' )` | Não | — | `'PROJETO'` |
+| `cidade` | `VARCHAR(100)` | Não | — | `''` |
+| `uf` | `CHAR(2)` | Não | — | `''` |
+| `modalidade` | `ENUM( 'PRESENCIAL', 'REMOTO', 'HIBRIDO' )` | Não | — | `'PRESENCIAL'` |
 | `status` | `ENUM( 'ABERTA', 'FECHADA', 'CANCELADA', 'SUSPENSA_PELO_CREA' )` | Não | — | `'ABERTA'` |
 | `data_publicacao` | `DATETIME` | Não | — | `CURRENT_TIMESTAMP` |
 | `data_fechamento` | `DATETIME` | Sim | — | `—` |

@@ -27,8 +27,6 @@ class Database
             self::$connection = new PDO($dsn, $_ENV['DB_USERNAME'], $_ENV['DB_PASSWORD'], [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                // Forca prepared statements reais no MariaDB (defesa adicional contra SQL Injection).
-                PDO::ATTR_EMULATE_PREPARES => false,
             ]);
         }
 

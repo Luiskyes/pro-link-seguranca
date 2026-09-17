@@ -41,6 +41,10 @@ CREATE TABLE usuarios (
 
     telefone VARCHAR(25) NOT NULL,
 
+    estado VARCHAR(25) NOT NULL,
+
+    cidade VARCHAR(25) NOT NULL,
+
     email VARCHAR(254) NOT NULL UNIQUE,
 
     conta_ativa BOOLEAN NOT NULL DEFAULT TRUE,
@@ -130,6 +134,17 @@ CREATE TABLE pessoa_juridica (
     nome_fantasia VARCHAR(150),
 
     razao_social VARCHAR(150) NOT NULL,
+
+    -- Selo de verificacao da empresa (contrato social + comprovante cadastral
+    -- enviados pelo proprio usuario, analisados manualmente pelo ADMIN_CREA).
+    status_verificacao ENUM('NAO_SOLICITADA', 'PENDENTE', 'APROVADA', 'REJEITADA')
+        NOT NULL DEFAULT 'NAO_SOLICITADA',
+
+    data_solicitacao_verificacao DATETIME,
+
+    doc_contrato_social VARCHAR(255),
+
+    doc_comprovante_cadastral VARCHAR(255),
 
     criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -534,6 +549,39 @@ CREATE TABLE projeto_competencias (
 
 
 -- ============================================================
+-- GALERIA DE IMAGENS DOS PROJETOS
+-- ============================================================
+
+CREATE TABLE projeto_imagens (
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+
+    id_projeto INT UNSIGNED NOT NULL,
+
+    nome_arquivo VARCHAR(255) NOT NULL,
+
+    nome_armazenado VARCHAR(255),
+
+    tipo_mime VARCHAR(100),
+
+    tamanho BIGINT UNSIGNED,
+
+    caminho_armazenamento VARCHAR(500) NOT NULL,
+
+    ordem SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+
+    criado_em DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_projeto_imagens_projeto
+        FOREIGN KEY (id_projeto)
+        REFERENCES projetos(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+
+    INDEX idx_projeto_imagens_projeto (id_projeto)
+) ENGINE=InnoDB;
+
+
+-- ============================================================
 -- EXPERIÊNCIAS
 -- ============================================================
 
@@ -762,15 +810,31 @@ CREATE TABLE demandas (
 
     descricao TEXT NOT NULL,
 
-    area_demanda VARCHAR(120) NOT NULL,
+    -- Area/tipo/modalidade/localizacao do escopo (RF04, item 7 - "Empresa publica demanda
+    -- com escopo, localizacao e requisitos"). Granularidade fina de habilidades exigidas
+    -- fica em demanda_competencias; estes campos sao a categorizacao ampla usada na busca.
+    area VARCHAR(100) NOT NULL DEFAULT '',
 
-    tipo_demanda ENUM('ESTAGIO','PROJETO','MENTORIA','PESQUISA','VOLUNTARIADO') NOT NULL DEFAULT 'ESTAGIO',
+    tipo ENUM(
+        'ESTAGIO',
+        'PROJETO',
+        'CONSULTORIA',
+        'ART',
+        'PERICIA',
+        'MENTORIA',
+        'PESQUISA',
+        'VOLUNTARIADO'
+    ) NOT NULL DEFAULT 'PROJETO',
 
-    cidade_demanda VARCHAR(120) NOT NULL,
+    cidade VARCHAR(100) NOT NULL DEFAULT '',
 
-    uf_demanda CHAR(2) NOT NULL,
+    uf CHAR(2) NOT NULL DEFAULT '',
 
-    modalidade ENUM('HIBRIDO','PRESENCIAL','REMOTO') NOT NULL DEFAULT 'PRESENCIAL',
+    modalidade ENUM(
+        'PRESENCIAL',
+        'REMOTO',
+        'HIBRIDO'
+    ) NOT NULL DEFAULT 'PRESENCIAL',
 
     status ENUM(
         'ABERTA',
