@@ -2,7 +2,7 @@
 // Gerenciamento de Sessão
 // Consagra funções para login, cadastro, recuperação de senha e autenticação social. Gerencia a persistência da sessão via cookies nativos.
 
-const API_BASE_URL = 'http://localhost:8080';
+const AUTH_API_BASE_URL = 'http://localhost:8080';
 
 // Constantes
 // URL Base da API
@@ -10,7 +10,7 @@ const API_BASE_URL = 'http://localhost:8080';
 
 
 async function getCsrfToken() {
-    const response = await fetch(`${API_BASE_URL}/csrf-token`, {
+    const response = await fetch(`${AUTH_API_BASE_URL}/csrf-token`, {
         credentials: 'include'
     });
     if (!response.ok) throw new Error('Não foi possível iniciar a sessão segura.');
@@ -42,7 +42,7 @@ function isUserAuthenticated() {
 async function loginUser(credentials) {
     try {
         const csrfToken = await getCsrfToken();
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        const response = await fetch(`${AUTH_API_BASE_URL}/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
             credentials: 'include', // Necessário para salvar o cookie de sessão do PHP
@@ -72,7 +72,7 @@ async function loginUser(credentials) {
 async function registerUser(formData) {
     try {
         const csrfToken = await getCsrfToken();
-        const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        const response = await fetch(`${AUTH_API_BASE_URL}/auth/register`, {
             method: 'POST',
             headers: { 'X-CSRF-Token': csrfToken },
             credentials: 'include', // Importante para manter a sessão e validar CSRF
@@ -96,7 +96,7 @@ async function registerUser(formData) {
 async function recoverPassword(email) {
     try {
         const csrfToken = await getCsrfToken();
-        const response = await fetch(`${API_BASE_URL}/recover-password`, {
+        const response = await fetch(`${AUTH_API_BASE_URL}/recover-password`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
             credentials: 'include',
@@ -118,13 +118,13 @@ async function recoverPassword(email) {
 // Login via Google
 // OAuth 2.0
 function loginWithGoogle() {
-    window.location.href = `${API_BASE_URL}/auth/google`; // Rotas sociais podem permanecer com /auth/ se criadas depois
+    window.location.href = `${AUTH_API_BASE_URL}/auth/google`; // Rotas sociais podem permanecer com /auth/ se criadas depois
 }
 
 // Login via LinkedIn
 // OAuth 2.0
 function loginWithLinkedIn() {
-    window.location.href = `${API_BASE_URL}/auth/linkedin`;
+    window.location.href = `${AUTH_API_BASE_URL}/auth/linkedin`;
 }
 
 // Logout
@@ -133,7 +133,7 @@ async function logoutUser() {
     try {
         // Avise o backend para invalidar a sessão
         const csrfToken = await getCsrfToken();
-        await fetch(`${API_BASE_URL}/auth/logout`, {
+        await fetch(`${AUTH_API_BASE_URL}/auth/logout`, {
             method: 'POST',
             headers: { 'X-CSRF-Token': csrfToken },
             credentials: 'include'

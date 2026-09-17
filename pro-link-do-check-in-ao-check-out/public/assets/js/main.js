@@ -127,6 +127,7 @@ $(document).ready(function() {
                             window.initConfig();
                         }
                     }, 50);
+                }
                 // Dispara renderização da tela de Administração
                 if (hash === '#admin') {
                     setTimeout(() => {
