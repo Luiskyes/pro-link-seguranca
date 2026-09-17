@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Middleware;
 
 use App\Core\Request;
+use App\Core\Response;
 
 // Protecao contra CSRF em requisicoes que alteram estado (POST).
 class CsrfMiddleware
@@ -20,8 +21,8 @@ class CsrfMiddleware
             ?? ($request->server['HTTP_X_CSRF_TOKEN'] ?? null);
 
         if (!hash_equals($_SESSION['_csrf_token'] ?? '', (string) $token)) {
-            http_response_code(419);
-            exit('Token CSRF invalido.');
+            Response::json(['message' => 'Token CSRF inválido ou ausente.'], 419);
+            exit;
         }
     }
 }

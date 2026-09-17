@@ -40,6 +40,9 @@ class Auth
     // session_regenerate_id evita fixacao de sessao em cada novo login.
     public static function login(User $user): void
     {
+        // Rotaciona tambem o token CSRF ao elevar a sessao para autenticada.
+        unset($_SESSION['_csrf_token']);
+
         $_SESSION['user'] = [
             'id' => $user->id,
             'nome' => $user->nome,
@@ -55,6 +58,19 @@ class Auth
     public static function logout(): void
     {
         $_SESSION = [];
+
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', [
+                'expires' => time() - 42000,
+                'path' => $params['path'] ?: '/',
+                'domain' => $params['domain'] ?? '',
+                'secure' => (bool) ($params['secure'] ?? false),
+                'httponly' => (bool) ($params['httponly'] ?? true),
+                'samesite' => $params['samesite'] ?? 'Lax',
+            ]);
+        }
+
         session_destroy();
     }
 }

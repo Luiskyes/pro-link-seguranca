@@ -106,14 +106,15 @@ class AuthController
         $email = (string) $request->input('email');
         $senha = (string) ($request->input('password') ?? $request->input('senha'));
         $telefone = (string) ($request->input('phone') ?? $request->input('telefone'));
-        $cpf = (string) $request->input('document_number', '');
-        $cnpj = (string) $request->input('document_number', '');
+        $documento = preg_replace('/\D+/', '', (string) $request->input('document_number', '')) ?? '';
 
         $profileTypeHtml = (string) $request->input('profile_type');
 
         // Mapeamento do tipo de pessoa baseado no profile_type
         // No banco de dados, o campo é ENUM('FISICA', 'JURIDICA')
         $tipoPessoa = ($profileTypeHtml === 'empresa') ? 'JURIDICA' : 'FISICA';
+        $cpf = $tipoPessoa === 'FISICA' ? $documento : '';
+        $cnpj = $tipoPessoa === 'JURIDICA' ? $documento : '';
 
         // Mapeamento do Perfil de Acesso baseado no HTML Select
         // No banco de dados, o campo é ENUM('USUARIO', 'ADMIN_CREA')
@@ -142,12 +143,12 @@ class AuthController
         // Erro caso o CPF/CNPJ já esteja cadastrado.
 
         if ($cpf !== '' && $this->pessoaFisicaRepository->findByCpf($cpf)) {
-            Response::json(['message' => 'CPF já está em uso.', 409]);
+            Response::json(['message' => 'CPF já está em uso.'], 409);
             return;
         }
 
         if ($cnpj !== '' && $this->pessoaJuridicaRepository->findByCnpj($cnpj)) {
-            Response::json(['message' => 'CNPJ já está em uso.', 409]);
+            Response::json(['message' => 'CNPJ já está em uso.'], 409);
             return;
         }
 

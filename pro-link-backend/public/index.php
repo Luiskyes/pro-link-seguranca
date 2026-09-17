@@ -32,6 +32,11 @@ ini_set('display_errors', $isProduction ? '0' : '1');
 ini_set('display_startup_errors', $isProduction ? '0' : '1');
 error_reporting(E_ALL);
 
+// Em HTTPS de produção, instrui o navegador a nunca retornar por HTTP.
+if ($isProduction && (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')) {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+
 // Dispara o carregamento do _config.php (timezone, charset, PATHs e config geral).
 config('app');
 

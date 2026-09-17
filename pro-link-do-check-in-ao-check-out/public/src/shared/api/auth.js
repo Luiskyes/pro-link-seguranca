@@ -49,14 +49,17 @@ async function loginUser(credentials) {
             body: JSON.stringify(credentials)
         });
         
-        // O backend faz redirect no sucesso (Response::redirect('/feed'))
-        if (response.redirected || response.ok) {
-            // Em caso de sucesso de login, definimos um usuário básico localmente para a flag de logado
-            sessionStorage.setItem('prolink_user', JSON.stringify({ email: credentials.email }));
-            return { success: true };
+        const data = await response.json().catch(() => ({}));
+
+        if (response.ok) {
+            // O cookie HttpOnly continua sendo a fonte real de autenticação.
+            // O sessionStorage guarda apenas dados de apresentação retornados pelo servidor.
+            if (data.user) {
+                sessionStorage.setItem('prolink_user', JSON.stringify(data.user));
+            }
+            return { success: true, user: data.user ?? null };
         }
 
-        const data = await response.json().catch(() => ({}));
         throw new Error(data.message || 'Erro ao realizar login.');
     } catch (error) {
         console.error('[Auth] Erro no login:', error.message);
