@@ -8,6 +8,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\Projeto;
 use App\Repositories\ProjetoRepository;
+use App\Repositories\PortfolioRepository;
 
 // RF03 - projetos exibidos dentro de um portfolio. As competencias utilizadas
 // sao sincronizadas via tabela `projeto_competencias`.
@@ -40,6 +41,11 @@ class ProjetoController
 
     public function store(Request $request): void
     {
+        $portfolio = $this->portfolios->findById((int) $request->input('id_portfolio'));
+        if ($portfolio === null || $portfolio->idUsuario !== auth_id()) {
+            Response::json(['message' => 'Recurso nao encontrado.'], 404);
+            return;
+        }
         $projeto = $this->fromRequest($request);
         $id = $this->projetos->save($projeto);
 
@@ -55,7 +61,9 @@ class ProjetoController
     {
         $id = (int) $request->input('id');
 
-        if ($this->projetos->findById($id) === null) {
+        $projetoExistente = $this->projetos->findById($id);
+        $portfolio = $projetoExistente !== null ? $this->portfolios->findById($projetoExistente->idPortfolio) : null;
+        if ($projetoExistente === null || $portfolio === null || $portfolio->idUsuario !== auth_id()) {
             Response::json(['message' => 'Projeto nao encontrado.'], 404);
             return;
         }
@@ -74,7 +82,14 @@ class ProjetoController
 
     public function destroy(Request $request): void
     {
-        $this->projetos->delete((int) $request->input('id'));
+        $id = (int) $request->input('id');
+        $projeto = $this->projetos->findById($id);
+        $portfolio = $projeto !== null ? $this->portfolios->findById($projeto->idPortfolio) : null;
+        if ($projeto === null || $portfolio === null || $portfolio->idUsuario !== auth_id()) {
+            Response::json(['message' => 'Projeto nao encontrado.'], 404);
+            return;
+        }
+        $this->projetos->delete($id);
 
         Response::json(['message' => 'Projeto removido.']);
     }

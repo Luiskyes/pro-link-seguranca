@@ -8,6 +8,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\Experiencia;
 use App\Repositories\ExperienciaRepository;
+use App\Repositories\PortfolioRepository;
 
 // RF03 - experiencias (posicoes/servicos) dentro de um portfolio, opcionalmente
 // vinculadas a projetos via `projeto_experiencia`.
@@ -42,6 +43,11 @@ class ExperienciaController
 
     public function store(Request $request): void
     {
+        $portfolio = $this->portfolios->findById((int) $request->input('id_portfolio'));
+        if ($portfolio === null || $portfolio->idUsuario !== auth_id()) {
+            Response::json(['message' => 'Recurso nao encontrado.'], 404);
+            return;
+        }
         $id = $this->experiencias->save($this->fromRequest($request));
 
         Response::json(['message' => 'Experiencia criada.', 'id' => $id], 201);
@@ -51,7 +57,9 @@ class ExperienciaController
     {
         $id = (int) $request->input('id');
 
-        if ($this->experiencias->findById($id) === null) {
+        $experienciaExistente = $this->experiencias->findById($id);
+        $portfolio = $experienciaExistente !== null ? $this->portfolios->findById($experienciaExistente->idPortfolio) : null;
+        if ($experienciaExistente === null || $portfolio === null || $portfolio->idUsuario !== auth_id()) {
             Response::json(['message' => 'Experiencia nao encontrada.'], 404);
             return;
         }
@@ -65,7 +73,14 @@ class ExperienciaController
 
     public function destroy(Request $request): void
     {
-        $this->experiencias->delete((int) $request->input('id'));
+        $id = (int) $request->input('id');
+        $experiencia = $this->experiencias->findById($id);
+        $portfolio = $experiencia !== null ? $this->portfolios->findById($experiencia->idPortfolio) : null;
+        if ($experiencia === null || $portfolio === null || $portfolio->idUsuario !== auth_id()) {
+            Response::json(['message' => 'Experiencia nao encontrada.'], 404);
+            return;
+        }
+        $this->experiencias->delete($id);
 
         Response::json(['message' => 'Experiencia removida.']);
     }
@@ -73,6 +88,15 @@ class ExperienciaController
     // Vincula/desvincula um projeto a esta experiencia (tabela `projeto_experiencia`).
     public function linkProjeto(Request $request): void
     {
+        $projeto = (new \App\Repositories\ProjetoRepository())->findById((int) $request->input('id_projeto'));
+        $experiencia = $this->experiencias->findById((int) $request->input('id_experiencia'));
+        $portfolioProjeto = $projeto !== null ? $this->portfolios->findById($projeto->idPortfolio) : null;
+        $portfolioExperiencia = $experiencia !== null ? $this->portfolios->findById($experiencia->idPortfolio) : null;
+        if ($projeto === null || $experiencia === null || $portfolioProjeto === null || $portfolioExperiencia === null
+            || $portfolioProjeto->idUsuario !== auth_id() || $portfolioExperiencia->idUsuario !== auth_id()) {
+            Response::json(['message' => 'Recurso nao encontrado.'], 404);
+            return;
+        }
         $this->experiencias->vincularProjeto(
             (int) $request->input('id_projeto'),
             (int) $request->input('id_experiencia'),
@@ -83,6 +107,15 @@ class ExperienciaController
 
     public function unlinkProjeto(Request $request): void
     {
+        $projeto = (new \App\Repositories\ProjetoRepository())->findById((int) $request->input('id_projeto'));
+        $experiencia = $this->experiencias->findById((int) $request->input('id_experiencia'));
+        $portfolioProjeto = $projeto !== null ? $this->portfolios->findById($projeto->idPortfolio) : null;
+        $portfolioExperiencia = $experiencia !== null ? $this->portfolios->findById($experiencia->idPortfolio) : null;
+        if ($projeto === null || $experiencia === null || $portfolioProjeto === null || $portfolioExperiencia === null
+            || $portfolioProjeto->idUsuario !== auth_id() || $portfolioExperiencia->idUsuario !== auth_id()) {
+            Response::json(['message' => 'Recurso nao encontrado.'], 404);
+            return;
+        }
         $this->experiencias->desvincularProjeto(
             (int) $request->input('id_projeto'),
             (int) $request->input('id_experiencia'),

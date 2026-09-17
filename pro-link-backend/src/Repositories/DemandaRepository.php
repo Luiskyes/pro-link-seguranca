@@ -36,7 +36,7 @@ class DemandaRepository
         $pdo = Database::connection();
         if ($demanda->id === null) {
             $stmt = $pdo->prepare(
-                'INSERT INTO demandas (id_empresa, titulo, descricao, area, tipo, cidade, uf, modalidade, status, data_publicacao, data_fechamento, criado_em) 
+                'INSERT INTO demandas (id_empresa, titulo, descricao, area_demanda, tipo_demanda, cidade_demanda, uf_demanda, modalidade, status, data_publicacao, data_fechamento, criado_em) 
                 VALUES (:id_empresa, :titulo, :descricao, :area, :tipo, :cidade, :uf, :modalidade, :status, :data_publicacao, :data_fechamento, :criado_em)'
             );
             $stmt->execute([
@@ -60,7 +60,10 @@ class DemandaRepository
             'UPDATE demandas SET 
             titulo = :titulo, 
             descricao = :descricao,
-            tipo = :tipo, 
+            area_demanda = :area,
+            tipo_demanda = :tipo,
+            cidade_demanda = :cidade,
+            uf_demanda = :uf,
             modalidade = :modalidade, 
             status = :status,
             data_fechamento = :data_fechamento, 
@@ -70,7 +73,10 @@ class DemandaRepository
         $stmt->execute([
             'titulo' => $demanda->titulo,
             'descricao' => $demanda->descricao,
+            'area' => $demanda->area,
             'tipo' => $demanda->tipo,
+            'cidade' => $demanda->cidade,
+            'uf' => $demanda->uf,
             'modalidade' => $demanda->modalidade,
             'status' => $demanda->status,
             'data_fechamento' => $demanda->dataFechamento,

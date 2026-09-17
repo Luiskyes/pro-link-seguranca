@@ -8,6 +8,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\Cat;
 use App\Repositories\CatRepository;
+use App\Repositories\PortfolioRepository;
 use App\Repositories\PessoaFisicaRepository;
 use App\Services\CreaApiService;
 
@@ -16,6 +17,7 @@ class CatController
 {
     public function __construct(
         private readonly CatRepository $cats = new CatRepository(),
+        private readonly PortfolioRepository $portfolios = new PortfolioRepository(),
         private readonly PessoaFisicaRepository $pessoaFisicaRepository = new PessoaFisicaRepository(),
         private readonly CreaApiService $creaApiService = new CreaApiService(),
     ) {
@@ -53,6 +55,11 @@ class CatController
 
     public function store(Request $request): void
     {
+        $portfolio = $this->portfolios->findById((int) $request->input('id_portfolio'));
+        if ($portfolio === null || $portfolio->idUsuario !== auth_id()) {
+            Response::json(['message' => 'Recurso nao encontrado.'], 404);
+            return;
+        }
         $codigo = (string) $request->input('codigo_autenticidade', '');
 
         if ($codigo !== '' && $this->cats->findByCodigoAutenticidade($codigo) !== null) {
@@ -69,7 +76,9 @@ class CatController
     {
         $id = (int) $request->input('id');
 
-        if ($this->cats->findById($id) === null) {
+        $catExistente = $this->cats->findById($id);
+        $portfolio = $catExistente !== null ? $this->portfolios->findById($catExistente->idPortfolio) : null;
+        if ($catExistente === null || $portfolio === null || $portfolio->idUsuario !== auth_id()) {
             Response::json(['message' => 'CAT nao encontrada.'], 404);
             return;
         }
@@ -124,7 +133,14 @@ class CatController
 
     public function destroy(Request $request): void
     {
-        $this->cats->delete((int) $request->input('id'));
+        $id = (int) $request->input('id');
+        $cat = $this->cats->findById($id);
+        $portfolio = $cat !== null ? $this->portfolios->findById($cat->idPortfolio) : null;
+        if ($cat === null || $portfolio === null || $portfolio->idUsuario !== auth_id()) {
+            Response::json(['message' => 'CAT nao encontrada.'], 404);
+            return;
+        }
+        $this->cats->delete($id);
 
         Response::json(['message' => 'CAT removida.']);
     }

@@ -59,19 +59,28 @@ class DemandaController
     {
         $id = (int) $request->input('id');
 
-        if ($this->demandaRepository->findById($id) === null) {
+        $existente = $this->demandaRepository->findById($id);
+        if ($existente === null || $existente->empresaId !== auth_id()) {
             Response::json(['message' => 'Demanda nao encontrada.'], 404);
             return;
         }
 
-        $this->demandaRepository->save($this->fromRequest($request));
+        $demanda = $this->fromRequest($request);
+        $demanda->id = $id;
+        $this->demandaRepository->save($demanda);
 
         Response::json(['message' => 'Demanda atualizada.']);
     }
 
     public function destroy(Request $request): void
     {
-        $this->demandaRepository->delete((int) $request->input('id'));
+        $id = (int) $request->input('id');
+        $existente = $this->demandaRepository->findById($id);
+        if ($existente === null || $existente->empresaId !== auth_id()) {
+            Response::json(['message' => 'Demanda nao encontrada.'], 404);
+            return;
+        }
+        $this->demandaRepository->delete($id);
 
         Response::json(['message' => 'Demanda removida.']);
     }

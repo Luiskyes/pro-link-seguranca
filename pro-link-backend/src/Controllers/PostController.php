@@ -81,9 +81,12 @@ class PostController
     // [IA]: Ajuste da assinatura para retorno void e envio de confirmação de exclusão em formato JSON.
     public function destroy(Request $request): void
     {
-        $this->postRepository->delete(
-            $this->postRepository->findById((int) $request->input('id'))
-        );
+        $post = $this->postRepository->findById((int) $request->input('id'));
+        if ($post === null || $post->userId !== auth_id()) {
+            Response::json(['message' => 'Post nao encontrado.'], 404);
+            return;
+        }
+        $this->postRepository->delete($post);
 
         Response::json(['message' => 'Post removido.']);
     }

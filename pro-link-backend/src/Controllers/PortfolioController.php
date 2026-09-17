@@ -112,7 +112,7 @@ class PortfolioController
     {
         $portfolio = $this->portfolios->findById((int) $request->input('id'));
 
-        if ($portfolio === null) {
+        if ($portfolio === null || $portfolio->idUsuario !== auth_id()) {
             Response::json(['message' => 'Portfolio não encontrado.'], 404);
             return;
         }
@@ -132,7 +132,8 @@ class PortfolioController
     {
         $id = (int) $request->input('id');
 
-        if ($this->portfolios->findById($id) === null) {
+        $portfolio = $this->portfolios->findById($id);
+        if ($portfolio === null || $portfolio->idUsuario !== auth_id()) {
             Response::json(['message' => 'Portfolio não encontrado.'], 404);
             return;
         }

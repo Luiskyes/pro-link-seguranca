@@ -8,6 +8,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\Art;
 use App\Repositories\ArtRepository;
+use App\Repositories\PortfolioRepository;
 use App\Repositories\PessoaFisicaRepository;
 use App\Services\CreaApiService;
 
@@ -17,6 +18,7 @@ class ArtController
 {
     public function __construct(
         private readonly ArtRepository $arts = new ArtRepository(),
+        private readonly PortfolioRepository $portfolios = new PortfolioRepository(),
         private readonly PessoaFisicaRepository $pessoaFisicaRepository = new PessoaFisicaRepository(),
         private readonly CreaApiService $creaApiService = new CreaApiService(),
     ) {
@@ -43,6 +45,11 @@ class ArtController
 
     public function store(Request $request): void
     {
+        $portfolio = $this->portfolios->findById((int) $request->input('id_portfolio'));
+        if ($portfolio === null || $portfolio->idUsuario !== auth_id()) {
+            Response::json(['message' => 'Recurso nao encontrado.'], 404);
+            return;
+        }
         if ($this->arts->findByNumero((string) $request->input('numero_art', '')) !== null) {
             Response::json(['message' => 'Ja existe uma ART com este numero.'], 409);
             return;
@@ -57,7 +64,9 @@ class ArtController
     {
         $id = (int) $request->input('id');
 
-        if ($this->arts->findById($id) === null) {
+        $artExistente = $this->arts->findById($id);
+        $portfolio = $artExistente !== null ? $this->portfolios->findById($artExistente->idPortfolio) : null;
+        if ($artExistente === null || $portfolio === null || $portfolio->idUsuario !== auth_id()) {
             Response::json(['message' => 'ART nao encontrada.'], 404);
             return;
         }
@@ -112,7 +121,14 @@ class ArtController
 
     public function destroy(Request $request): void
     {
-        $this->arts->delete((int) $request->input('id'));
+        $id = (int) $request->input('id');
+        $art = $this->arts->findById($id);
+        $portfolio = $art !== null ? $this->portfolios->findById($art->idPortfolio) : null;
+        if ($art === null || $portfolio === null || $portfolio->idUsuario !== auth_id()) {
+            Response::json(['message' => 'ART nao encontrada.'], 404);
+            return;
+        }
+        $this->arts->delete($id);
 
         Response::json(['message' => 'ART removida.']);
     }

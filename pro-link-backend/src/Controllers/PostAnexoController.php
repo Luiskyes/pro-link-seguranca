@@ -8,13 +8,15 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\Anexo;
 use App\Repositories\AnexoRepository;
+use App\Repositories\PostRepository;
 
 // RF05 - anexos (imagens, documentos) vinculados a um post.
 // Refatorado com assistência de Inteligência Artificial para alinhamento aos padrões arquiteturais do projeto.
 class PostAnexoController
 {
     public function __construct(
-        private readonly AnexoRepository $anexoRepository = new AnexoRepository()
+        private readonly AnexoRepository $anexoRepository = new AnexoRepository(),
+        private readonly PostRepository $postRepository = new PostRepository()
     ) {
     }
 
@@ -42,7 +44,13 @@ class PostAnexoController
     // [IA]: Implementação da persistência utilizando fromRequest() e resposta padronizada JSON (status 201).
     public function store(Request $request): void
     {
-        $id = $this->anexoRepository->save($this->fromRequest($request));
+        $postId = (int) $request->input('id');
+        $post = $this->postRepository->findById($postId);
+        if ($post === null || $post->userId !== auth_id()) {
+            Response::json(['message' => 'Post nao encontrado.'], 404);
+            return;
+        }
+        $id = $this->anexoRepository->save($this->fromRequest($request, $postId));
 
         Response::json(['message' => 'Anexo criado.', 'id' => $id], 201);
     }
@@ -58,11 +66,11 @@ class PostAnexoController
     }
 
     // [IA]: Criação de método auxiliar privado para construção do objeto Anexo a partir da Request.
-    private function fromRequest(Request $request): Anexo
+    private function fromRequest(Request $request, ?int $postId = null): Anexo
     {
         return new Anexo(
             id: null,
-            postId: (int) $request->input('id_post'),
+            postId: $postId ?? (int) $request->input('id_post'),
             nome: (string) $request->input('nome', ''),
             nomeArmazenado: (string) $request->input('nome_armazenado', ''),
             tipoMime: (string) $request->input('tipo_mime', ''),

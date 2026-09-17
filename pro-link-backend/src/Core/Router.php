@@ -31,6 +31,26 @@ class Router
     public function dispatch(string $method, string $path): void
     {
         $route = $this->routes[$method][$path] ?? null;
+        $routeParams = [];
+
+        // Resolve parametros declarados como {id}, sem aceitar barras dentro do valor.
+        if ($route === null) {
+            foreach ($this->routes[$method] ?? [] as $registeredPath => $candidate) {
+                $paramNames = [];
+                $pattern = preg_replace_callback('/\{([A-Za-z_][A-Za-z0-9_]*)\}/', static function (array $m) use (&$paramNames): string {
+                    $paramNames[] = $m[1];
+                    return '([^/]+)';
+                }, $registeredPath);
+                $pattern = '#^' . $pattern . '$#';
+
+                if (preg_match($pattern, $path, $matches) === 1) {
+                    array_shift($matches);
+                    $routeParams = array_combine($paramNames, array_map('urldecode', $matches)) ?: [];
+                    $route = $candidate;
+                    break;
+                }
+            }
+        }
 
         // Nenhuma rota corresponde: responde 404 com a view de erro.
         if ($route === null) {
@@ -39,7 +59,7 @@ class Router
             return;
         }
 
-        $request = new Request();
+        $request = new Request($routeParams);
 
         // Pipeline de middlewares (ex: sanitizacao -> CSRF -> autenticacao -> perfil).
         // Cada item pode ser um class-string (instanciado sem argumentos) ou uma

@@ -8,6 +8,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Models\DemonstracaoInteresse;
 use App\Repositories\DemonstracaoInteresseRepository;
+use App\Repositories\DemandaRepository;
 use App\Services\NotificacaoService;
 
 // RF04/RF05 - manifestacoes de interesse de pessoas fisicas sobre demandas
@@ -16,6 +17,7 @@ class DemonstracaoInteresseController
 {
     public function __construct(
         private readonly DemonstracaoInteresseRepository $interesses = new DemonstracaoInteresseRepository(),
+        private readonly DemandaRepository $demandas = new DemandaRepository(),
         private readonly NotificacaoService $notificacaoService = new NotificacaoService()
     ) {
     }
@@ -23,7 +25,12 @@ class DemonstracaoInteresseController
     // Interesses de uma demanda (?id_demanda=) para a empresa dona da vaga.
     public function porDemanda(Request $request): void
     {
-        $idDemanda = (int) $request->input('id_demanda');
+        $idDemanda = (int) $request->input('id');
+        $demanda = $this->demandas->findById($idDemanda);
+        if ($demanda === null || $demanda->empresaId !== auth_id()) {
+            Response::json(['message' => 'Demanda nao encontrada.'], 404);
+            return;
+        }
 
         Response::json(['data' => $this->interesses->listByDemanda($idDemanda)]);
     }
@@ -65,7 +72,8 @@ class DemonstracaoInteresseController
         $status = (string) $request->input('status', DemonstracaoInteresse::STATUS_EM_ANALISE);
 
         $interesse = $this->interesses->findById($id);
-        if ($interesse === null) {
+        $demanda = $interesse !== null ? $this->demandas->findById($interesse->idDemanda) : null;
+        if ($interesse === null || $demanda === null || $demanda->empresaId !== auth_id()) {
             Response::json(['message' => 'Demonstracao de interesse nao encontrada.'], 404);
             return;
         }

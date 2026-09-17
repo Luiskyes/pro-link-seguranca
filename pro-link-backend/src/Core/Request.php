@@ -12,10 +12,12 @@ class Request
     public readonly array $body;
     public readonly array $server;
     public readonly array $files;
+    public readonly array $routeParams;
 
     // Captura o estado das superglobais no momento em que a Request e criada.
-    public function __construct()
+    public function __construct(array $routeParams = [])
     {
+        $this->routeParams = $routeParams;
         $this->query = $_GET;
         $this->files = $_FILES;
 
@@ -33,7 +35,7 @@ class Request
     // Busca um valor no corpo da requisicao, com fallback para a query string.
     public function input(string $key, mixed $default = null): mixed
     {
-        return $this->body[$key] ?? $this->query[$key] ?? $default;
+        return $this->routeParams[$key] ?? $this->body[$key] ?? $this->query[$key] ?? $default;
     }
 
     // Retorna os dados do usuario autenticado na sessao, ou null se nao houver login.
