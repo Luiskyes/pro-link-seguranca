@@ -1,0 +1,94 @@
+/* ====================================================
+   Página: Estúdio Profissional
+   Padrão idêntico ao feed.css e portfolio.css
+   ==================================================== */
+
+/* 1. Fundo fixo cobrindo a tela toda (padrão global) */
+.pl-estudio-fullscreen-bg {
+  position: fixed;
+  inset: 0;
+  background-color: var(--prolink-bg-darker);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 2. Wrapper posicionado acima do fundo */
+.pl-estudio-page-wrapper {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  color: var(--prolink-light);
+  font-family: var(--font-primary, 'Ubuntu', sans-serif);
+}
+
+/* 3. Container centralizado com max-width (padrão global) */
+.pl-estudio-main-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem 120px 1rem;
+}
+
+/* 4. Cabeçalho da página */
+.pl-estudio-header {
+  margin-bottom: 2rem;
+}
+
+.pl-estudio-header h2 {
+  color: var(--prolink-blue);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+}
+
+.pl-estudio-header p {
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* 5. Grid dos painéis */
+.pl-estudio-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  align-items: stretch;
+}
+
+.pl-grid-full-width {
+  grid-column: 1 / -1;
+}
+
+.pl-estudio-grid-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.pl-estudio-grid-item > div {
+  flex-grow: 1;
+}
+
+/* 6. Estado de loading dos slots */
+.pl-estudio-loading {
+  background: transparent;
+  border: 1px dashed rgba(43, 140, 255, 0.3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--prolink-blue);
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+/* 7. Responsividade */
+@media (max-width: 992px) {
+  .pl-estudio-main-container {
+    padding: 1.5rem 1rem 120px 1rem;
+  }
+
+  .pl-estudio-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,70 @@
+.pl-portfolio-panel {
+  background-color: transparent;
+  border: 1px solid var(--prolink-blue);
+  border-radius: 12px;
+  padding: 2rem;
+  font-family: var(--font-primary, 'Ubuntu', sans-serif);
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Header --- */
+.pl-portfolio-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(43, 140, 255, 0.2);
+}
+
+.pl-portfolio-title {
+  color: var(--prolink-blue);
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pl-portfolio-title i {
+  color: var(--prolink-blue);
+}
+
+.pl-portfolio-desc {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* --- Botões de ação (padrão outline do sistema) --- */
+.pl-portfolio-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.pl-portfolio-card {
+  background-color: transparent;
+  border: 1px solid var(--prolink-blue);
+  border-radius: 8px;
+  color: var(--prolink-blue);
+  font-family: var(--font-primary, 'Ubuntu', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.pl-portfolio-card:hover {
+  background-color: rgba(43, 140, 255, 0.1);
+}
+
+.pl-portfolio-card i {
+  font-size: 1rem;
+}
