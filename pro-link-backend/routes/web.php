@@ -85,7 +85,7 @@ $router->get('/posts', [PostController::class, 'index']);
 $router->post('/posts', [PostController::class, 'store'], [AuthMiddleware::class, SanitizeInputMiddleware::class, CsrfMiddleware::class]);
 $router->post('/posts/edit', [PostController::class, 'update'], [AuthMiddleware::class, SanitizeInputMiddleware::class, CsrfMiddleware::class]);
 $router->post('/posts/{id}/remover', [PostController::class, 'destroy'], [AuthMiddleware::class, CsrfMiddleware::class]);
-$router->post('/posts/{id}/anexos', [PostAnexoController::class, 'store'], [SanitizeInputMiddleware::class, CsrfMiddleware::class]);
+$router->post('/posts/{id}/anexos', [PostAnexoController::class, 'store'], [AuthMiddleware::class, SanitizeInputMiddleware::class, CsrfMiddleware::class]);
 $router->post('/posts/{id}/like', [PostController::class, 'likePost'], [AuthMiddleware::class]);
 
 // RF05 - comentarios em posts (e respostas a outros comentarios via id_comentario).

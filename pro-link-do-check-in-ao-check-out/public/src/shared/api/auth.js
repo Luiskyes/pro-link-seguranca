@@ -48,7 +48,7 @@ async function loginUser(credentials) {
             credentials: 'include', // Necessário para salvar o cookie de sessão do PHP
             body: JSON.stringify(credentials)
         });
-        
+
         const data = await response.json().catch(() => ({}));
 
         if (response.ok) {
@@ -78,7 +78,7 @@ async function registerUser(formData) {
             credentials: 'include', // Importante para manter a sessão e validar CSRF
             body: formData // Não definir Content-Type: browser define boundary automaticamente
         });
-        
+
         if (response.redirected || response.ok) {
             return { success: true };
         }
@@ -102,7 +102,7 @@ async function recoverPassword(email) {
             credentials: 'include',
             body: JSON.stringify({ email })
         });
-        
+
         if (response.redirected || response.ok) {
             return { success: true };
         }
@@ -169,7 +169,7 @@ async function logoutUser() {
     } catch (e) {
         console.error('Erro no logout remoto', e);
     }
-    
+
     // Limpe os dados locais
     sessionStorage.removeItem('prolink_user');
     window.location.hash = '#auth';
